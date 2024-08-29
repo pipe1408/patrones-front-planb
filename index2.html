@@ -1,0 +1,169 @@
+<html><head>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+	<title>Macs R Poo</title>
+	
+	<style>
+	.inline-80 {
+		display: inline-block; 
+		width: 80px;
+	}
+	</style>
+</head>
+<body>
+	<div class="container" id="listing">
+		<h3>Listing</h3>
+		<table class="table table-striped" id="tabla">
+			<thead>
+				<tr>
+                    <th>ID</th>
+					<th>Texto</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="container" id="new-entry">
+		<h3>New Entry</h3>
+		<form>
+			<div class="form-group">
+				<label class="inline-80">Mensaje</label> &nbsp;
+				<input type="text" id="miCampoTexto">
+			</div>
+			
+			
+			<div class="form-group">
+				<input type="submit" value="Save" class="btn btn-primary" id="miBoton">
+			</div>
+		</form>
+	</div>
+	
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+
+    document.addEventListener("DOMContentLoaded", function() {
+    // Función para realizar la solicitud GET
+    function hacerGetRequest() {
+        fetch('http://localhost:8081/api/mensajes')  // Reemplaza con tu URL
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json();
+            })
+            .then(data => {
+                llenarTabla(data);  // Maneja los datos aquí
+            })
+            .catch(error => {
+                console.error('Hubo un problema con la solicitud:', error);
+            });
+    }
+
+    function hacerPostRequest(data) {
+        fetch('http://localhost:8081/api/nuevo_mensaje', {  // Reemplaza con tu URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ texto: data })  // Enviar los datos en el cuerpo de la solicitud
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Respuesta del servidor:', data);  // Manejar la respuesta del servidor aquí
+        })
+        .catch(error => {
+            console.error('Hubo un problema con la solicitud:', error);
+        });
+    }
+
+    function llenarTabla(data) {
+        const tabla = document.getElementById("tabla").getElementsByTagName('tbody')[0];
+        tabla.innerHTML = "";  // Limpiar cualquier contenido anterior
+
+        data.forEach(item => {
+            const fila = tabla.insertRow();
+
+            Object.values(item).forEach(valor => {
+                const celda = fila.insertCell();
+                celda.textContent = valor;
+            });
+        });
+    }
+
+    document.getElementById("miBoton").addEventListener("click", function() {
+        const campoTexto = document.getElementById("miCampoTexto");
+        const valorTexto = campoTexto.value.trim();  // Obtener y limpiar el texto
+
+        if (valorTexto) {
+            hacerPostRequest(valorTexto);  // Ejecutar la solicitud POST
+            campoTexto.value = "";  // Limpiar el campo de texto
+        }
+        
+        hacerGetRequest();  // Ejecutar la solicitud GET después del POST o de todas formas
+    });
+
+    // Ejecutar al cargar la página
+    hacerGetRequest();
+
+    // Añadir evento al botón
+    document.getElementById("miBoton").addEventListener("click", hacerGetRequest);
+});
+
+	// ]]>
+</script>
+
+</body></html>
