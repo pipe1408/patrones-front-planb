@@ -63,7 +63,7 @@
 			event.preventDefault();
 	
 			// Get the current timestamp
-			const timestamp = new Date().toISOString();
+			const timestamp = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString();
 	
 			// Construct the URL with the timestamp as a path variable
 			const url = `http://localhost:8080/api/notificar/${encodeURIComponent(timestamp)}`;
@@ -89,7 +89,12 @@
 					`;
 	
 					// Append the new row to the table body
-					tableBody.appendChild(newRow);
+
+					if (tableBody.firstChild) {
+						tableBody.insertBefore(newRow, tableBody.firstChild);
+					} else {
+						tableBody.appendChild(newRow);
+					}
 				})
 				.catch(error => console.error('Error:', error));
 		}
