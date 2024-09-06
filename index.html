@@ -19,25 +19,12 @@
 	</style>
 </head>
 <body>
-	<div>
-		&nbsp;
-	</div>
-	
-	<div class="container" id="login-dialog">
-		<form class="col-lg-4 col-lg-offset-4" style="border: 1px solid #aaa; text-align: center;">
+
+	<div class="container" id="new-entry">
+		<h3>Nueva Notificacion</h3>
+		<form>
 			<div class="form-group">
-			&nbsp;
-			</div>
-			<div class="form-group">
-				<label>Username</label> &nbsp;
-				<input type="text" id="username" />
-			</div>	
-			<div class="form-group">
-				<label>Password</label> &nbsp;
-				<input type="password" id="password" />
-			</div>
-			<div class="form-group">
-				<input type="submit" value="Login" class="btn btn-primary" />
+				<button class="btn btn-primary" id="notificar">Save</button>
 			</div>
 		</form>
 	</div>
@@ -45,67 +32,69 @@
 	<div>
 		&nbsp;
 	</div>
-	
-	<div class="container" id="menu">
-		<a href="#" class="btn btn-default">Parts</a> &nbsp; 
-		<a href="#" class="btn btn-default">Requisitions</a> &nbsp; 
-		<a href="#" class="btn btn-default">Orders</a> &nbsp; 
-		<a href="#" class="btn btn-default">Pick Tickets</a> &nbsp; 
-	</div>
-	
-	<div>
-		&nbsp;
-	</div>
-	
+
 	<div class="container" id="listing">
-		<h3>Listing</h3>
-		<table class="table table-striped">
+		<h3>Notificaciones</h3>
+		<table class="table table-striped" id="tabla">
 			<thead>
 				<tr>
+					<th>Resultado</th>
 					<th>Code</th>
-					<th>Description</th>
-					<th>UOM</th>
-					<th>Actions</th>
+					<th>Proveedor</th>
+					<th>Enviado</th>
+					<th>Recibido</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					<td>NU-CH-000001</td>
-					<td>Chocolate chip cookies</td>
-					<td>Pack</td>
-					<td>
-						<a href="#" class="btn btn-default">Edit</a> &nbsp; 
-						<a href="#" class="btn btn-default">Default</a>
-					</td>
+
 				</tr>
 			</tbody>
 		</table>
 	</div>
 	
-	<div class="container" id="new-entry">
-		<h3>New Entry</h3>
-		<form>
-			<div class="form-group">
-				<label class="inline-80">Code</label> &nbsp;
-				<input type="text" id="code" />
-			</div>
-			<div class="form-group">
-				<label class="inline-80">Description</label> &nbsp;
-				<input type="text" id="descr" />
-			</div>
-			<div class="form-group">
-				<label class="inline-80">UOM</label> &nbsp;
-				<input type="text" id="uom" />
-			</div>
-			<div class="form-group">
-				<input type="submit" value="Save" class="btn btn-primary" />
-			</div>
-		</form>
-	</div>
-	
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
+	<script>
+		function fetchData(event) {
+			// Prevent the form from submitting and reloading the page
+			event.preventDefault();
+	
+			// Get the current timestamp
+			const timestamp = new Date().toISOString();
+	
+			// Construct the URL with the timestamp as a path variable
+			const url = `http://localhost:8080/api/notificar/${encodeURIComponent(timestamp)}`;
+	
+			// Fetch data from the Spring Boot API
+			fetch(url)
+				.then(response => response.json())
+				.then(data => {
+					// Get reference to the table body
+					const tableBody = document.querySelector('#tabla tbody');
+					
+					// Create a new row
+					const newRow = document.createElement('tr');
+	
+					// Fill the row with data from the ResponseDTO
+					newRow.innerHTML = `
+						<td>${data.result}</td>
+						<td>${data.code}</td>
+						<td>${data.provider}</td>
+						<td>${data.timeReceived}</td>
+						<td>${data.timeResponded}</td>
+					`;
+	
+					// Append the new row to the table body
+					tableBody.appendChild(newRow);
+				})
+				.catch(error => console.error('Error:', error));
+		}
+	
+		// Attach the event listener to the button
+		document.getElementById('notificar').addEventListener('click', fetchData);
+	</script>
+	
 </body>
 </html>
